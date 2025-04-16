@@ -1,0 +1,392 @@
+.space-details-container {
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+    min-height: 100vh;
+}
+
+.details-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.btn-back {
+    position: absolute;
+    left: 0;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+.details-header h2 {
+    margin: 0 auto;
+    color: #2c3e50;
+    font-size: 28px;
+}
+
+.space-type-badge {
+    position: absolute;
+    right: 0;
+    background-color: #3498db;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.space-type-badge:before {
+    content: "Type: ";
+}
+
+.details-content {
+    display: flex;
+    gap: 2rem;
+}
+
+.main-details {
+    flex: 3;
+}
+
+.details-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.details-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.details-section h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.space-description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.key-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.detail-value.status {
+    font-weight: bold;
+}
+
+.detail-value.status.available {
+    color: #27ae60;
+}
+
+.detail-value.status.rented {
+    color: #e74c3c;
+}
+
+.amenities-list {
+    list-style-type: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.amenities-list li {
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #34495e;
+    font-size: 14px;
+}
+
+.amenities-list li:before {
+    content: "✓ ";
+    color: #27ae60;
+}
+
+.map-placeholder {
+    background-color: #f8f9fa;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.map-indicator {
+    display: flex;
+    align-items: center;
+}
+
+.map-pin {
+    width: 20px;
+    height: 20px;
+    border-radius: 50% 50% 50% 0;
+    background-color: #e74c3c;
+    transform: rotate(-45deg);
+    margin-right: 8px;
+}
+
+.map-placeholder p {
+    color: #7f8c8d;
+    margin: 0.5rem 0;
+}
+
+.specific-details {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.specific-details h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-card, .contact-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.action-card h3, .contact-card h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.action-card button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-edit {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #2980b9;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+.btn-rent {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-rent:hover {
+    background-color: #219653;
+}
+
+.contact-details p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+
+.contact-details p strong {
+    color: #2c3e50;
+}
+
+.edit-form {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-group.checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.form-group.checkbox label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.form-group.checkbox input {
+    margin-right: 8px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-save {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #219653;
+}
+
+.btn-cancel {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #7f8c8d;
+}
+
+.loading, .error-message {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #7f8c8d;
+}
+
+.error-message {
+    color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+    .details-content {
+        flex-direction: column;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
