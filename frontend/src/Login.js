@@ -10,7 +10,7 @@ function Login({ setUser }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await authInstance.post('/users/login', {
+            const response = await authInstance.post('/auth/login', {
                 username,
                 password
             });

@@ -41,16 +41,21 @@ function MapPage() {
     const [filteredSpaces, setFilteredSpaces] = useState([]);
     const [filter, setFilter] = useState('ALL');
     const [availableOnly, setAvailableOnly] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchSpaces = async () => {
+            setIsLoading(true);
             try {
-                const res = await axios.get('http://localhost:8080/spaces');
+                const res = await axios.get('http://localhost:8080/spaces/getAll');
                 setSpaces(res.data);
                 setFilteredSpaces(res.data);
+                console.log(res.data);
             } catch (err) {
                 console.error('Error fetching spaces for map', err);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -60,12 +65,10 @@ function MapPage() {
     useEffect(() => {
         let filtered = spaces;
 
-        // Apply space type filter
         if (filter !== 'ALL') {
             filtered = filtered.filter(space => space.spaceType === filter);
         }
 
-        // Apply availability filter
         if (availableOnly) {
             filtered = filtered.filter(space => space.available);
         }
@@ -132,51 +135,57 @@ function MapPage() {
                 </div>
             </div>
 
-            <MapContainer
-                center={[46.77, 23.59]} // Default center on Cluj-Napoca, Romania
-                zoom={6}
-                scrollWheelZoom={true}
-                style={{ height: 'calc(100vh - 180px)', width: '100%', borderRadius: '10px' }}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {filteredSpaces.map((space) => {
-                    if (!space.latitude || !space.longitude) return null;
+            {isLoading ? (
+                <div className="loading-container">
+                    <p>Loading map data...</p>
+                </div>
+            ) : (
+                <MapContainer
+                    center={[46.77, 23.59]}
+                    zoom={6}
+                    scrollWheelZoom={true}
+                    style={{ height: 'calc(100vh - 180px)', width: '100%', borderRadius: '10px' }}
+                >
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    {filteredSpaces.map((space) => {
+                        if (!space.latitude || !space.longitude) return null;
 
-                    return (
-                        <Marker
-                            key={space.id}
-                            position={[space.latitude, space.longitude]}
-                            icon={getIcon(space.spaceType)}
-                        >
-                            <Popup>
-                                <div className="map-popup">
-                                    <h3>{space.name}</h3>
-                                    <p className="popup-type">{space.spaceType}</p>
-                                    <p>{space.description}</p>
-                                    <div className="popup-details">
-                                        <p><strong>Area:</strong> {space.area} m²</p>
-                                        <p><strong>Price:</strong> {space.pricePerMonth} €/month</p>
-                                        <p><strong>Status:</strong>
-                                            <span className={space.available ? 'available' : 'rented'}>
-                                                {space.available ? ' Available' : ' Rented'}
-                                            </span>
-                                        </p>
+                        return (
+                            <Marker
+                                key={space.id}
+                                position={[space.latitude, space.longitude]}
+                                icon={getIcon(space.spaceType)}
+                            >
+                                <Popup>
+                                    <div className="map-popup">
+                                        <h3>{space.name}</h3>
+                                        <p className="popup-type">{space.spaceType || 'Unknown'}</p>
+                                        <p>{space.description}</p>
+                                        <div className="popup-details">
+                                            <p><strong>Area:</strong> {space.area} m²</p>
+                                            <p><strong>Price:</strong> {space.pricePerMonth} €/month</p>
+                                            <p><strong>Status:</strong>
+                                                <span className={space.available ? 'available' : 'rented'}>
+                                                    {space.available ? ' Available' : ' Rented'}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <button
+                                            className="popup-button"
+                                            onClick={() => handleViewDetails(space.id)}
+                                        >
+                                            View Details
+                                        </button>
                                     </div>
-                                    <button
-                                        className="popup-button"
-                                        onClick={() => handleViewDetails(space.id)}
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    );
-                })}
-            </MapContainer>
+                                </Popup>
+                            </Marker>
+                        );
+                    })}
+                </MapContainer>
+            )}
 
             <div className="map-stats">
                 <p>Showing {filteredSpaces.length} spaces on the map</p>

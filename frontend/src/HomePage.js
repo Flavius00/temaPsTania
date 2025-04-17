@@ -116,8 +116,6 @@ function HomePage({ setUser }) {
                         </ul>
                     </div>
 
-                    <img src={buildingImage} alt="Commercial Building" className="homepage-image" />
-
                     <div className="right-reviews">
                         <h3>🌟 Client Feedback</h3>
                         <blockquote>"Streamlined our office leasing process completely."</blockquote>

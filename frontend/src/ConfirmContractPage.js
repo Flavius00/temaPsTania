@@ -1,213 +1,172 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './ConfirmContractPage.css';
+import { jsPDF } from 'jspdf';
 
 function ConfirmContractPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { selectedSpace, renewalContract } = location.state || {};
-    const [contractDuration, setContractDuration] = useState(12); // Default 12 months
-    const [isRenewal, setIsRenewal] = useState(!!renewalContract);
+    const [contract, setContract] = useState(null);
+    const [space, setSpace] = useState(null);
+    const [isDataMissing, setIsDataMissing] = useState(false);
+    const [countdown, setCountdown] = useState(10);
+    const [isLoading, setIsLoading] = useState(true);
 
-    if (!selectedSpace) {
-        return <p className="text-center mt-4">Missing space information.</p>;
-    }
+    useEffect(() => {
+        // Verifică dacă există date necesare în state
+        if (!location.state || !location.state.contract || !location.state.space) {
+            setIsDataMissing(true);
+        }
 
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-        navigate('/login');
-        return null;
-    }
+        setContract(location.state.contract);
+        setSpace(location.state.space);
+        setIsLoading(false); // Datele au fost încărcate
+    }, [location, navigate, countdown]);
 
-    const calculateEndDate = (startDate, months) => {
-        const date = new Date(startDate);
-        date.setMonth(date.getMonth() + months);
-        return date.toISOString().split('T')[0];
+    const handleViewContracts = () => {
+        navigate('/contracts');
     };
 
-    const today = new Date().toISOString().split('T')[0];
-    const endDate = calculateEndDate(today, contractDuration);
-    const totalPrice = selectedSpace.pricePerMonth * contractDuration;
-    const securityDeposit = selectedSpace.pricePerMonth * 2;
-
-    const generateContractPDF = (contract) => {
-        const doc = new jsPDF();
-
-        // Add header
-        doc.setFontSize(20);
-        doc.text("Commercial Space Rental Contract", 20, 20);
-
-        // Add contract details
-        doc.setFontSize(12);
-        doc.text(`Contract Number: ${contract.contractNumber}`, 20, 40);
-        doc.text(`Date Created: ${new Date().toLocaleDateString()}`, 20, 50);
-
-        // Parties involved
-        doc.setFontSize(14);
-        doc.text("Parties", 20, 70);
-        doc.setFontSize(12);
-        doc.text(`Landlord: ${selectedSpace.owner.name}`, 20, 80);
-        doc.text(`Company: ${selectedSpace.owner.companyName || 'N/A'}`, 20, 90);
-        doc.text(`Tenant: ${user.name}`, 20, 100);
-        doc.text(`Company: ${user.companyName || 'N/A'}`, 20, 110);
-
-        // Property details
-        doc.setFontSize(14);
-        doc.text("Property Details", 20, 130);
-        doc.setFontSize(12);
-        doc.text(`Space Name: ${selectedSpace.name}`, 20, 140);
-        doc.text(`Address: ${selectedSpace.address}`, 20, 150);
-        doc.text(`Space Type: ${selectedSpace.spaceType}`, 20, 160);
-        doc.text(`Area: ${selectedSpace.area} m²`, 20, 170);
-
-        // Contract terms
-        doc.setFontSize(14);
-        doc.text("Contract Terms", 20, 190);
-        doc.setFontSize(12);
-        doc.text(`Start Date: ${contract.startDate}`, 20, 200);
-        doc.text(`End Date: ${contract.endDate}`, 20, 210);
-        doc.text(`Monthly Rent: €${contract.monthlyRent}`, 20, 220);
-        doc.text(`Security Deposit: €${contract.securityDeposit}`, 20, 230);
-        doc.text(`Status: ${contract.status}`, 20, 240);
-
-        // Return the document
-        return doc;
-    };
-
-    const handleCreateContract = async () => {
+    const handleDownloadContract = () => {
+        console.log(contract.paymentMethod);
         try {
-            const contractData = {
-                space: selectedSpace,
-                tenant: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email
-                },
-                startDate: today,
-                endDate: endDate,
-                monthlyRent: selectedSpace.pricePerMonth,
-                securityDeposit: securityDeposit,
-                status: "ACTIVE",
-                isPaid: true,
-                dateCreated: today
-            };
+            // Folosim jsPDF importat la începutul fișierului
+            const doc = new jsPDF();
 
-            // Handle renewal case
-            if (isRenewal && renewalContract) {
-                contractData.contractNumber = `RENEWAL-${renewalContract.contractNumber || renewalContract.id}`;
-                // Call the renew endpoint instead
-                await axios.post(`http://localhost:8080/contracts/${renewalContract.id}/renew`, contractData);
-            } else {
-                // Normal contract creation
-                const response = await axios.post('http://localhost:8080/contracts/create', contractData);
-                contractData.contractNumber = response.data.contractNumber;
-            }
+            // Adăugarea antetului
+            doc.setFontSize(20);
+            doc.setTextColor(0, 51, 102);
+            doc.text("CONTRACT DE ÎNCHIRIERE", 105, 15, { align: "center" });
+            doc.setFontSize(14);
+            doc.text("Nr. " + contract.contractNumber, 105, 25, { align: "center" });
 
-            // Generate PDF
-            const pdf = generateContractPDF(contractData);
-            pdf.save(`Rental_Contract_${selectedSpace.name.replace(/\s+/g, '_')}.pdf`);
+            // Adăugarea informațiilor despre spațiu
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text("DETALII SPAȚIU ÎNCHIRIAT:", 20, 40);
 
-            // Show success message
-            const toast = document.createElement('div');
-            toast.innerText = "✅ Contract created successfully!";
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.right = '20px';
-            toast.style.backgroundColor = '#4CAF50';
-            toast.style.color = 'white';
-            toast.style.padding = '10px 20px';
-            toast.style.borderRadius = '5px';
-            toast.style.zIndex = '1000';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            doc.setFontSize(10);
+            doc.text("Nume: " + space.name, 25, 50);
+            doc.text("Suprafață: " + space.area + " m²", 25, 57);
 
-            navigate('/contracts');
+            // Adăugarea informațiilor despre contract
+            doc.setFontSize(12);
+            doc.text("DETALII CONTRACT:", 20, 70);
+
+            doc.setFontSize(10);
+            doc.text("Număr Contract: " + contract.contractNumber, 25, 80);
+            doc.text("Perioadă: " + contract.startDate + " - " + contract.endDate, 25, 87);
+            doc.text("Chirie Lunară: " + contract.monthlyRent + " €", 25, 94);
+            doc.text("Garanție: " + contract.securityDeposit + " €", 25, 101);
+
+            const paymentMethodText =
+                contract.paymentMethod === 'card' ? 'Card de credit/debit' :
+                    contract.paymentMethod === 'transfer' ? 'Transfer bancar' :
+                        contract.paymentMethod === 'cash' ? 'Numerar' : contract.paymentMethod;
+
+            doc.text("Metodă de Plată: " + paymentMethodText, 25, 108);
+
+            // Adăugarea secțiunii pentru semnături
+            doc.setFontSize(12);
+            doc.text("SEMNĂTURI:", 20, 125);
+
+            doc.setFontSize(10);
+            doc.text("Proprietar: ______________________", 25, 140);
+            doc.text("Chiriaș: ________________________", 25, 150);
+
+            // Adăugarea datei și a notelor de subsol
+            const currentDate = new Date().toLocaleDateString('ro-RO');
+            doc.text("Document generat la data: " + currentDate, 20, 180);
+
+            doc.setFontSize(8);
+            doc.text("Acest document reprezintă o confirmare a contractului de închiriere. Pentru informații suplimentare, contactați support@spatii-comerciale.ro.", 20, 270);
+
+            // Descărcarea PDF-ului
+            doc.save("Contract_" + contract.contractNumber + ".pdf");
+
         } catch (error) {
-            console.error("Contract creation failed", error);
-            alert("Failed to create contract. Please try again.");
+            console.error("Eroare la generarea PDF-ului:", error);
+            alert("A apărut o eroare la generarea PDF-ului. Vă rugăm să încercați din nou.");
         }
     };
 
-    const handleCancel = () => {
-        navigate('/spaces');
-    };
+    if (isDataMissing) {
+        return (
+            <div className="contract-confirmation-container error">
+                <div className="error-message">
+                    <i className="error-icon">⚠️</i>
+                    <h2>Informații lipsă</h2>
+                    <p>Nu s-au găsit informațiile necesare pentru afișarea confirmării contractului.</p>
+                    <p>Veți fi redirecționat în 5 secunde...</p>
+                </div>
+            </div>
+        );
+    }
 
+    // Adăugăm verificare pentru loading
+    if (isLoading) {
+        return (
+            <div className="contract-confirmation-container">
+                <div className="loading-message">
+                    <p>Se încarcă informațiile contractului...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Acum suntem siguri că space și contract nu sunt null
     return (
-        <div className="confirm-container">
-            <div className="confirm-card">
-                <img src={buildingIcon} alt="Building Icon" className="building-icon" />
-                <h3>{isRenewal ? 'Renew Rental Contract' : 'Confirm Rental Contract'}</h3>
+        <div className="contract-confirmation-container">
+            <div className="confirmation-card">
+                <div className="success-icon">✓</div>
+                <h2>Contract Semnat cu Succes!</h2>
+                <p className="confirmation-message">
+                    Contractul de închiriere pentru spațiul <strong>{space?.name}</strong> a fost semnat și înregistrat cu succes.
+                </p>
 
                 <div className="contract-details">
-                    <div className="detail-section">
-                        <h4>Space Details</h4>
-                        <p><strong>Name:</strong> {selectedSpace.name}</p>
-                        <p><strong>Type:</strong> {selectedSpace.spaceType}</p>
-                        <p><strong>Area:</strong> {selectedSpace.area} m²</p>
-                        <p><strong>Location:</strong> {selectedSpace.building?.name || selectedSpace.address}</p>
+                    <div className="detail-item">
+                        <span className="detail-label">Număr Contract:</span>
+                        <span className="detail-value">{contract?.contractNumber}</span>
                     </div>
-
-                    <div className="detail-section">
-                        <h4>Contract Terms</h4>
-                        <p><strong>Monthly Rent:</strong> €{selectedSpace.pricePerMonth}</p>
-                        <p><strong>Security Deposit:</strong> €{securityDeposit}</p>
-                        <p><strong>Start Date:</strong> {today}</p>
-
-                        <div className="duration-selector">
-                            <label htmlFor="duration">Contract Duration:</label>
-                            <select
-                                id="duration"
-                                value={contractDuration}
-                                onChange={(e) => setContractDuration(parseInt(e.target.value))}
-                            >
-                                <option value="6">6 months</option>
-                                <option value="12">12 months</option>
-                                <option value="24">24 months</option>
-                                <option value="36">36 months</option>
-                            </select>
-                        </div>
-
-                        <p><strong>End Date:</strong> {endDate}</p>
+                    <div className="detail-item">
+                        <span className="detail-label">Spațiu Închiriat:</span>
+                        <span className="detail-value">{space?.name} ({space?.area} m²)</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Perioadă:</span>
+                        <span className="detail-value">{contract?.startDate} - {contract?.endDate}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Chirie Lunară:</span>
+                        <span className="detail-value">{contract?.monthlyRent} €</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Garanție:</span>
+                        <span className="detail-value">{contract?.securityDeposit} €</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Metodă de Plată:</span>
+                        <span className="detail-value">
+                            {contract?.paymentMethod === 'card' ? 'Card de credit/debit' :
+                                contract?.paymentMethod === 'transfer' ? 'Transfer bancar' :
+                                    contract?.paymentMethod === 'cash' ? 'Numerar' : contract?.paymentMethod}
+                        </span>
                     </div>
                 </div>
 
-                <div className="price-summary">
-                    <h4>Payment Summary</h4>
-                    <div className="summary-row">
-                        <span>Monthly Rent:</span>
-                        <span>€{selectedSpace.pricePerMonth}</span>
-                    </div>
-                    <div className="summary-row">
-                        <span>Contract Duration:</span>
-                        <span>{contractDuration} months</span>
-                    </div>
-                    <div className="summary-row">
-                        <span>Security Deposit:</span>
-                        <span>€{securityDeposit}</span>
-                    </div>
-                    <div className="summary-row total">
-                        <span>Total First Payment:</span>
-                        <span>€{selectedSpace.pricePerMonth + securityDeposit}</span>
-                    </div>
-                    <div className="summary-row contract-total">
-                        <span>Contract Total Value:</span>
-                        <span>€{totalPrice}</span>
-                    </div>
-                </div>
-
-                <div className="terms-agreement">
-                    <p className="terms-text">
-                        By confirming this contract, you agree to the rental terms and conditions.
-                        A PDF of the contract will be generated for your records.
-                    </p>
-                </div>
-
-                <div className="btn-group">
-                    <button className="btn btn-confirm" onClick={handleCreateContract}>
-                        {isRenewal ? 'Renew Contract' : 'Confirm Contract'}
+                <div className="confirmation-actions">
+                    <button className="btn btn-primary" onClick={handleViewContracts}>
+                        Vezi Contractele Mele
                     </button>
-                    <button className="btn btn-cancel" onClick={handleCancel}>Cancel</button>
+                    <button className="btn btn-secondary" onClick={handleDownloadContract}>
+                        Descarcă Contract PDF
+                    </button>
+                </div>
+
+                <div className="contact-info">
+                    <p>Aveți întrebări despre contractul dumneavoastră?</p>
+                    <p>Contactați-ne la <a href="mailto:support@spatii-comerciale.ro">support@spatii-comerciale.ro</a> sau sunați la <strong>0712 345 678</strong>.</p>
                 </div>
             </div>
         </div>

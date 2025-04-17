@@ -19,38 +19,37 @@ function ContractsPage() {
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
         setUser(storedUser);
+        console.log(storedUser);
 
         const fetchContracts = async () => {
             try {
                 let response;
 
-                // Get contracts based on user role
+                //Get contracts based on user role
                 if (storedUser?.role === 'TENANT') {
                     response = await axios.get(`http://localhost:8080/contracts/tenant/${storedUser.id}`);
+                    console.log("am fost aiciiiii");
+                    console.log(response.data);
+                    console.log(storedUser);
                 } else if (storedUser?.role === 'OWNER') {
-                    // First get owner's spaces
-                    const spacesResponse = await axios.get(`http://localhost:8080/spaces/owner/${storedUser.id}`);
-                    const spaceIds = spacesResponse.data.map(space => space.id);
-
-                    // Then get contracts for those spaces
-                    const contractPromises = spaceIds.map(spaceId =>
-                        axios.get(`http://localhost:8080/contracts/space/${spaceId}`)
-                    );
-
-                    const contractResponses = await Promise.all(contractPromises);
-                    const allContracts = contractResponses.flatMap(res => res.data);
-
-                    // Set as response for consistent handling below
-                    response = { data: allContracts };
+                    response = await axios.get(`http://localhost:8080/contracts/owner/${storedUser.id}`);
                 } else {
-                    // Admin gets all contracts
+                    //Admin gets all contracts
                     response = await axios.get('http://localhost:8080/contracts');
                 }
 
-                setContracts(response.data);
-                setFilteredContracts(response.data);
+                console.log(response.data);
+
+                // Ensure we're always dealing with an array
+                const contractsData = Array.isArray(response.data) ? response.data : [];
+
+                setContracts(contractsData);
+                setFilteredContracts(contractsData);
             } catch (error) {
                 console.error('Error fetching contracts:', error);
+                // Initialize with empty arrays in case of error
+                setContracts([]);
+                setFilteredContracts([]);
             }
         };
 
@@ -62,6 +61,12 @@ function ContractsPage() {
     };
 
     const handleFilter = () => {
+        // Ensure contracts is an array before filtering
+        if (!Array.isArray(contracts)) {
+            console.error('Contracts is not an array:', contracts);
+            return;
+        }
+
         let filtered = contracts.filter(contract => {
             const startDateObj = contract.startDate ? new Date(contract.startDate) : null;
             const endDateObj = contract.endDate ? new Date(contract.endDate) : null;
@@ -100,7 +105,7 @@ function ContractsPage() {
         setContractStatuses([]);
         setSpaceTypes([]);
         setSortOption('');
-        setFilteredContracts(contracts);
+        setFilteredContracts(Array.isArray(contracts) ? contracts : []);
     };
 
     const handleRenewContract = (contract) => {
@@ -119,6 +124,11 @@ function ContractsPage() {
 
                 // Update contracts list
                 setContracts(prevContracts => {
+                    if (!Array.isArray(prevContracts)) {
+                        console.error('Previous contracts is not an array:', prevContracts);
+                        return [];
+                    }
+
                     const updatedContracts = prevContracts.map(c =>
                         c.id === contractId ? { ...c, status: 'TERMINATED' } : c
                     );
@@ -146,6 +156,9 @@ function ContractsPage() {
             day: 'numeric'
         });
     };
+
+    // Ensure filteredContracts is an array before rendering
+    const contractsToRender = Array.isArray(filteredContracts) ? filteredContracts : [];
 
     return (
         <div className="contracts-container">
@@ -239,7 +252,7 @@ function ContractsPage() {
                 </div>
             </div>
 
-            {filteredContracts.length === 0 ? (
+            {contractsToRender.length === 0 ? (
                 <p className="no-contracts-message">No contracts match your search criteria.</p>
             ) : (
                 <div className="contracts-table-container">
@@ -254,11 +267,10 @@ function ContractsPage() {
                             <th>End Date</th>
                             <th>Monthly Rent</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredContracts.map(contract => (
+                        {contractsToRender.map(contract => (
                             <tr key={contract.id} className={`status-${contract.status?.toLowerCase()}`}>
                                 <td>{contract.contractNumber || `CONT-${contract.id}`}</td>
                                 <td>{contract.space?.name || 'N/A'}</td>
@@ -272,48 +284,9 @@ function ContractsPage() {
                                 <td>{formatDate(contract.endDate)}</td>
                                 <td>{contract.monthlyRent} €</td>
                                 <td>
-                                        <span className={`status-badge ${contract.status?.toLowerCase()}`}>
+                                        <span className={`status-badge ${contract.status?.toLowerCase() || ''}`}>
                                             {contract.status || 'N/A'}
                                         </span>
-                                </td>
-                                <td className="action-buttons">
-                                    <button
-                                        className="btn-action btn-view"
-                                        onClick={() => handleViewDetails(contract)}
-                                    >
-                                        View
-                                    </button>
-
-                                    {/* Tenant can renew contracts that are active or almost expired */}
-                                    {user?.role === 'TENANT' &&
-                                        (contract.status === 'ACTIVE' || contract.status === 'EXPIRED') && (
-                                            <button
-                                                className="btn-action btn-renew"
-                                                onClick={() => handleRenewContract(contract)}
-                                            >
-                                                Renew
-                                            </button>
-                                        )}
-
-                                    {/* Owner can terminate active contracts */}
-                                    {user?.role === 'OWNER' && contract.status === 'ACTIVE' && (
-                                        <button
-                                            className="btn-action btn-terminate"
-                                            onClick={() => handleTerminateContract(contract.id)}
-                                        >
-                                            Terminate
-                                        </button>
-                                    )}
-
-                                    {/* Admin can manage all contracts */}
-                                    {user?.role === 'ADMIN' && contract.status === 'ACTIVE' && (
-                                        <button
-                                            className="btn-action btn-terminate"
-                                            onClick={() => handleTerminateContract(contract.id)}
-                                        >
-                                            Terminate
-                                        </button>
-                                    )}
                                 </td>
                             </tr>
                         ))}

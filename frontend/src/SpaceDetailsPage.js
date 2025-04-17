@@ -320,17 +320,6 @@ function SpaceDetailsPage() {
                             <h3>Amenities</h3>
                             {renderAmenities()}
                         </div>
-
-                        <div className="details-section">
-                            <h3>Location</h3>
-                            <div className="map-placeholder">
-                                <div className="map-indicator">
-                                    <i className="map-pin"></i>
-                                    <p>Map loading...</p>
-                                </div>
-                                <p>Coordinates: {space.latitude}, {space.longitude}</p>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="details-sidebar">

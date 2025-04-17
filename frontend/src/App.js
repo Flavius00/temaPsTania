@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import HomePage from './HomePage';
 import SpacesPage from './SpacesPage';
@@ -7,6 +7,10 @@ import ContractsPage from './ContractsPage';
 import ConfirmContractPage from './ConfirmContractPage';
 import MapPage from './MapPage';
 import SpaceDetailsPage from './SpaceDetailsPage';
+import ProfilePage from './ProfilePage';
+import BuildingsPage from './BuildingsPage';
+import CreateSpacePage from './CreateSpacePage';
+import RentalContractPage from './RentalContractPage';
 
 function App() {
     const [user, setUser] = useState(() => {
@@ -30,10 +34,12 @@ function App() {
                 <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login setUser={setUser} />} />
                 <Route path="/home" element={user ? <HomePage setUser={setUser} /> : <Navigate to="/login" />} />
                 <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/login" />} />
+                <Route path="/spaces/create" element={user ? <CreateSpacePage /> : <Navigate to="/login" />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to="/login" replace />} />
                 <Route path="/contracts" element={user ? <ContractsPage /> : <Navigate to="/login" />} />
-                <Route path="/payment/confirm" element={user ? <ConfirmContractPage /> : <Navigate to="/login" />} />
+                <Route path="/payment" element={user ? <RentalContractPage />  : <Navigate to="/login" />} />
+                <Route path="/payment/confirm" element={user ?  <ConfirmContractPage />: <Navigate to="/login" />} />
                 <Route path="/map" element={user ? <MapPage /> : <Navigate to="/login" />} />
                 <Route path="/space-details/:id" element={user ? <SpaceDetailsPage /> : <Navigate to="/login" />} />
                 <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
