@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.constants;
 
 /**
  * Enum pentru tipurile de spații comerciale disponibile în sistem.

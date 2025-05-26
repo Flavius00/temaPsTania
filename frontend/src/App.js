@@ -1,5 +1,7 @@
+// frontend/src/App.js - Add WebSocket integration
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { connect, disconnect } from './helper/websocket';
 import Login from './Login';
 import HomePage from './HomePage';
 import SpacesPage from './SpacesPage';
@@ -11,12 +13,14 @@ import ProfilePage from './ProfilePage';
 import BuildingsPage from './BuildingsPage';
 import CreateSpacePage from './CreateSpacePage';
 import RentalContractPage from './RentalContractPage';
+import NotificationCenter from './components/NotificationCenter';
 
 function App() {
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
         return storedUser ? JSON.parse(storedUser) : null;
     });
+    const [showNotifications, setShowNotifications] = useState(false);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -25,11 +29,41 @@ function App() {
         };
 
         window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
+
+        // Connect to WebSocket if user is logged in
+        if (user) {
+            connect(
+                () => console.log('WebSocket Connected'),
+                (error) => console.error('WebSocket Error:', error)
+            );
+        }
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            // Disconnect WebSocket when component unmounts
+            disconnect();
+        };
+    }, [user]);
+
+    // Toggle notification panel
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+    };
 
     return (
         <Router>
+            {user && (
+                <div className="notification-icon" onClick={toggleNotifications}>
+                    <i className="fas fa-bell"></i>
+                </div>
+            )}
+
+            {user && showNotifications && (
+                <div className="notification-panel">
+                    <NotificationCenter />
+                </div>
+            )}
+
             <Routes>
                 <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login setUser={setUser} />} />
                 <Route path="/home" element={user ? <HomePage setUser={setUser} /> : <Navigate to="/login" />} />

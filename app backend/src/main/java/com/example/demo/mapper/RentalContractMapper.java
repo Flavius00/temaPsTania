@@ -1,7 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.RentalContractDTO;
-import com.example.demo.entity.RentalContract;
+import com.example.demo.model.RentalContract;
 import org.mapstruct.*;
 
 import java.time.LocalDate;

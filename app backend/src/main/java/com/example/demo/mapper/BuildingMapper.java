@@ -1,7 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.BuildingDTO;
-import com.example.demo.entity.Building;
+import com.example.demo.model.Building;
 import org.mapstruct.*;
 
 import java.util.List;

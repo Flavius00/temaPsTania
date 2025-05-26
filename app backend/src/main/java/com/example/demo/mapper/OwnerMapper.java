@@ -1,8 +1,8 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.OwnerDTO;
-import com.example.demo.entity.Owner;
-import com.example.demo.entity.User;
+import com.example.demo.model.Owner;
+import com.example.demo.model.User;
 import org.mapstruct.*;
 
 import java.util.List;

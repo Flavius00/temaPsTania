@@ -1,7 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.ParkingDTO;
-import com.example.demo.entity.Parking;
+import com.example.demo.model.Parking;
 import org.mapstruct.*;
 
 import java.util.List;

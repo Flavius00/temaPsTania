@@ -1,7 +1,7 @@
 package com.example.demo.repository;
 
-import com.example.demo.entity.ComercialSpace;
-import com.example.demo.entity.SpaceType;
+import com.example.demo.model.ComercialSpace;
+import com.example.demo.constants.SpaceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -282,4 +282,5 @@ public interface ComercialSpaceRepository extends JpaRepository<ComercialSpace, 
     @Query("SELECT DISTINCT s FROM ComercialSpace s JOIN s.contracts c " +
             "WHERE c.status = 'ACTIVE' AND c.endDate <= CURRENT_DATE + :daysUntilExpiration")
     List<ComercialSpace> findSpacesWithExpiringContracts(@Param("daysUntilExpiration") int daysUntilExpiration);
+
 }

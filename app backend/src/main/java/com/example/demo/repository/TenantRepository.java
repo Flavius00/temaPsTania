@@ -1,7 +1,7 @@
 package com.example.demo.repository;
 
-import com.example.demo.entity.SpaceType;
-import com.example.demo.entity.Tenant;
+import com.example.demo.constants.SpaceType;
+import com.example.demo.model.Tenant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

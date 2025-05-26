@@ -1,7 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.ComercialSpaceDTO;
-import com.example.demo.entity.ComercialSpace;
+import com.example.demo.model.ComercialSpace;
 import org.mapstruct.*;
 
 import java.util.List;
